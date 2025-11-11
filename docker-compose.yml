@@ -1,0 +1,62 @@
+version: "3.7"
+
+services:
+  mongo:
+    image: mongo
+    container_name: myapp-mongo
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: myapp-server
+    container_name: myapp-node-server
+    command: /usr/src/app/node_modules/.bin/nodemon index.js
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  client:
+    build:
+      context: ./GUI/Fashion
+      dockerfile: Dockerfile
+    image: myapp-client
+    container_name: myapp-react-client
+    command: npm start
+    volumes:
+      - ./GUI/Fashion:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+    environment:
+      # Helps file watching/reload on Windows/WSL
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - HOST=0.0.0.0
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data-volume:
