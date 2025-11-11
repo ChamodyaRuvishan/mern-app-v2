@@ -1,0 +1,21 @@
+#footercontent {
+    min-height: 20vh;
+    background-color: #432eff70;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1em; /* Decrease the size of the paragraph text */
+    color: #fff;
+  }
+  
+  #footercontent p {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between the icon and the text */
+  }
+  
+  #footercontent .icon {
+    font-size: 3em; /* Increase the size of the icon */
+  }

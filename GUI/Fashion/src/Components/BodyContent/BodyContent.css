@@ -1,0 +1,13 @@
+#bodycontent {
+    min-height: 34vh;
+    background-color: #5e3dff;
+    padding: 20px;
+    font-size: 1.2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    margin: 0; /* Remove margin */
+  }

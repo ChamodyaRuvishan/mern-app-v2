@@ -1,0 +1,63 @@
+.offers {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(to bottom, #bababa,  #ffffff); /* Gradient from top to bottom */
+    height: 100vh; /* Full viewport height */
+    box-sizing: border-box;
+  }
+  
+  .offers-left {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .offers-left h1 {
+    font-size: 3em;
+    margin: 0;
+    color: #6d6d6d;
+  }
+  
+  .offers-left p {
+    font-size: 1.5em;
+    margin: 20px 0;
+    color: #6d6d6d;
+  }
+  
+  .offers-left button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #6d6d6d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+  
+.offers-left button:hover {
+    background-color: #ffffff;
+    transform: scale(1.05);
+    color: #a8a8a8;                /* Ash text */
+    border: 1px solid #a8a8a8;     /* Matching ash border */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+  
+  .offers-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .offers-right img {
+    max-width: 50%;
+    height: auto;
+  }

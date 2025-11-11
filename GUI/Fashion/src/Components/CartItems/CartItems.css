@@ -1,0 +1,122 @@
+.cartitems {
+    padding: 20px;
+  }
+  
+  .cartitems-format-main {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 15px;
+    background: var(--gradient-gold);
+    color: var(--primary-dark);
+    border-radius: 8px;
+  }
+  
+  .cartitems-format {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    margin-bottom: 15px;
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .carticon-product-icon {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin: 0 auto;
+    border-radius: 8px;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+  }
+  
+  .cartitems-format p {
+    margin: 0;
+  }
+  
+  .remove-icon {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    margin: 0 auto;
+    transition: var(--transition);
+  }
+  
+  .remove-icon:hover {
+    transform: scale(1.1);
+  }
+.cartitems-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cartitems-quantity button {
+  background: var(--primary-gold);
+  color: var(--primary-dark);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+.cartitems-quantity button:hover {
+  background: #B8941F;
+  transform: scale(1.1);
+}
+
+.cartitems-quantity span {
+  font-weight: 600;
+  font-size: 16px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.cartitems {
+  padding: 40px;
+  background: linear-gradient(135deg, var(--primary-light) 0%, #f0f0f0 100%);
+  min-height: 100vh;
+}
+
+.cartitems-total {
+  background: white;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  max-width: 400px;
+  margin-top: 30px;
+}
+
+.cartitems-total h1 {
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.cartitems-total button {
+  background: var(--gradient-gold);
+  color: var(--primary-dark);
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  transition: var(--transition);
+}
+
+.cartitems-total button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+}
