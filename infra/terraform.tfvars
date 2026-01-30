@@ -11,5 +11,5 @@ health_check_path = "/"
 env = {
   MONGO_URI = "mongodb+srv://cruvishan9:Balangoda123manawaya@cluster0.dtywg.mongodb.net/mern-db?appName=Cluster0" # REPLACE THIS
   NODE_ENV  = "production"
-  JWT_SECRET = "your_secret_here"
+  JWT_SECRET = "skdjfhkjsdhfkjhsdkjfhkjsdhf"
 }
