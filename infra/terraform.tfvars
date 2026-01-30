@@ -9,6 +9,6 @@ health_check_path = "/"
 
 # Add environment variables for your app here
 env = {
-  MONGO_URI = "mongodb+srv://user:pass@cluster.mongodb.net/db" # REPLACE THIS
+  MONGO_URI = "mongodb+srv://cruvishan9:Balangoda123manawaya@cluster0.dtywg.mongodb.net/mern-db?appName=Cluster0" # REPLACE THIS
   NODE_ENV  = "production"
 }
