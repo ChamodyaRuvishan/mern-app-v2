@@ -4,7 +4,7 @@ region            = "us-east-1"
 name              = "mern-backend"
 image_repo        = "chamodyaruvishan/mern-backend" # REPLACE THIS
 image_tag         = "latest"
-app_port          = 3001
+app_port          = 8000
 health_check_path = "/"
 
 # Add environment variables for your app here
