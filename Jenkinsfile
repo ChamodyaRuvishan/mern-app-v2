@@ -61,7 +61,7 @@ pipeline {
                 dir('infra') {
                     // Use AWS Credentials stored in Jenkins (ID: AWS_CREDS)
                     withCredentials([usernamePassword(credentialsId: 'AWS_CREDS', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        sh """
+                        sh '''
                             set -e
                             # Trim accidental spaces/newlines from Jenkins credential fields
                             export AWS_ACCESS_KEY_ID=\$(echo "\$AWS_ACCESS_KEY_ID" | tr -d '[:space:]')
@@ -71,7 +71,7 @@ pipeline {
 
                             echo "BRANCH_NAME=\${BRANCH_NAME:-unset}"
                             echo "GIT_BRANCH=\${GIT_BRANCH:-unset}"
-                            echo "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"
+                            echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
                             echo "AWS_ACCESS_KEY_ID_PREFIX=\${AWS_ACCESS_KEY_ID%%????}****"
 
                             if command -v aws >/dev/null 2>&1; then
@@ -189,12 +189,12 @@ pipeline {
 
                             echo "Deploying to AWS..."
                             terraform apply -auto-approve \\
-                              -var region=${AWS_DEFAULT_REGION} \\
+                              -var region=$AWS_DEFAULT_REGION \\
                               -var name=mern-backend \\
-                              -var image_repo=${DOCKERHUB_USER}/mern-backend \\
-                              -var image_tag=${TAG_SHORT} \\
+                              -var image_repo=$DOCKERHUB_USER/mern-backend \\
+                              -var image_tag=$TAG_SHORT \\
                               -var app_port=8000
-                        """
+                        '''
                     }
                 }
             }
