@@ -39,3 +39,15 @@ variable "instance_type" {
   type    = string
   default = "t3.micro"
 }
+
+variable "key_name" {
+  type        = string
+  default     = ""
+  description = "Existing EC2 key pair name for SSH. Leave empty to skip key pair attachment."
+}
+
+variable "ssh_cidr" {
+  type        = string
+  default     = "0.0.0.0/0"
+  description = "CIDR allowed to SSH to the instance. Restrict to your IP in production."
+}

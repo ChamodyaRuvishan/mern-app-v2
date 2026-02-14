@@ -7,6 +7,8 @@ image_tag         = "latest"
 app_port          = 8000
 health_check_path = "/"
 instance_type     = "t3.micro"
+key_name          = "jenkins-deploy-key"
+ssh_cidr          = "0.0.0.0/0"
 
 # Add environment variables for your app here
 env = {

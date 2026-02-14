@@ -75,6 +75,13 @@ resource "aws_security_group" "svc" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.ssh_cidr]
+  }
 }
 
 # --- Load Balancer ---
@@ -122,6 +129,7 @@ locals {
 resource "aws_instance" "app" {
   ami                         = data.aws_ami.amazon_linux_2023.id
   instance_type               = var.instance_type
+  key_name                    = var.key_name != "" ? var.key_name : null
   subnet_id                   = data.aws_subnets.default.ids[0]
   vpc_security_group_ids      = [aws_security_group.svc.id]
   associate_public_ip_address = true
@@ -131,6 +139,7 @@ resource "aws_instance" "app" {
               set -euxo pipefail
               dnf update -y
               dnf install -y docker
+              dnf install -y ec2-instance-connect
               systemctl enable docker
               systemctl start docker
 
