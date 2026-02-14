@@ -222,7 +222,14 @@ pipeline {
                               fi
                             done
 
-                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" 'docker ps --format "{{.Names}} {{.Status}}"'
+                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" '
+                              set -e
+                              if command -v sudo >/dev/null 2>&1; then
+                                sudo -n docker ps --format "{{.Names}} {{.Status}}" || sudo docker ps --format "{{.Names}} {{.Status}}"
+                              else
+                                docker ps --format "{{.Names}} {{.Status}}"
+                              fi
+                            '
                         '''
                     }
                 }
