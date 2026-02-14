@@ -30,27 +30,12 @@ variable "health_check_path" {
   default = "/"
 }
 
-variable "cpu" {
-  type    = number
-  default = 256
-}
-
-variable "memory" {
-  type    = number
-  default = 512
-}
-
-variable "desired_count" {
-  type    = number
-  default = 1
-}
-
-variable "container_name" {
-  type    = string
-  default = ""
-}
-
 variable "env" {
   type    = map(string)
   default = {}
+}
+
+variable "instance_type" {
+  type    = string
+  default = "t3.micro"
 }

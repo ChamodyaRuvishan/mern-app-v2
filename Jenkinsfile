@@ -145,43 +145,27 @@ pipeline {
                                   fi
                                 fi
 
-                                # IAM execution role
-                                if ! tf_state_has aws_iam_role.task_execution; then
-                                  ROLE_NAME=$(aws iam get-role --role-name mern-backend-exec-role --query 'Role.RoleName' --output text 2>/dev/null || true)
-                                  if [ -n "$ROLE_NAME" ] && [ "$ROLE_NAME" != "None" ]; then
-                                    terraform import aws_iam_role.task_execution "$ROLE_NAME" || true
+                                # EC2 instance
+                                if ! tf_state_has aws_instance.app; then
+                                  INSTANCE_ID=$(aws ec2 describe-instances --filters Name=tag:Name,Values=mern-backend-ec2 Name=instance-state-name,Values=pending,running,stopping,stopped --query 'Reservations[0].Instances[0].InstanceId' --output text 2>/dev/null || true)
+                                  if [ -n "$INSTANCE_ID" ] && [ "$INSTANCE_ID" != "None" ]; then
+                                    terraform import aws_instance.app "$INSTANCE_ID" || true
                                   fi
                                 fi
 
-                                # Role policy attachment
-                                if ! tf_state_has aws_iam_role_policy_attachment.task_execution; then
-                                  ATTACHED=$(aws iam list-attached-role-policies --role-name mern-backend-exec-role --query 'AttachedPolicies[?PolicyArn==`arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy`]|length(@)' --output text 2>/dev/null || true)
-                                  if [ "$ATTACHED" = "1" ]; then
-                                    terraform import aws_iam_role_policy_attachment.task_execution "mern-backend-exec-role/arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" || true
+                                # Target group attachment (IP mode)
+                                if ! tf_state_has aws_lb_target_group_attachment.app; then
+                                  if [ -z "${TG_ARN:-}" ] || [ "${TG_ARN:-None}" = "None" ]; then
+                                    TG_ARN=$(aws elbv2 describe-target-groups --names mern-backend-tg --query 'TargetGroups[0].TargetGroupArn' --output text 2>/dev/null || true)
                                   fi
-                                fi
-
-                                # Log group
-                                if ! tf_state_has aws_cloudwatch_log_group.this; then
-                                  LOG_GROUP_NAME=$(aws logs describe-log-groups --log-group-name-prefix "/ecs/mern-backend" --query 'logGroups[?logGroupName==`/ecs/mern-backend`]|[0].logGroupName' --output text 2>/dev/null || true)
-                                  if [ "$LOG_GROUP_NAME" = "/ecs/mern-backend" ]; then
-                                    terraform import aws_cloudwatch_log_group.this "/ecs/mern-backend" || true
+                                  if [ -z "${INSTANCE_ID:-}" ] || [ "${INSTANCE_ID:-None}" = "None" ]; then
+                                    INSTANCE_ID=$(aws ec2 describe-instances --filters Name=tag:Name,Values=mern-backend-ec2 Name=instance-state-name,Values=pending,running,stopping,stopped --query 'Reservations[0].Instances[0].InstanceId' --output text 2>/dev/null || true)
                                   fi
-                                fi
-
-                                # ECS Cluster
-                                if ! tf_state_has aws_ecs_cluster.this; then
-                                  CLUSTER_ARN=$(aws ecs describe-clusters --clusters mern-backend-cluster --query 'clusters[0].clusterArn' --output text 2>/dev/null || true)
-                                  if [ -n "$CLUSTER_ARN" ] && [ "$CLUSTER_ARN" != "None" ] && [ "$CLUSTER_ARN" != "MISSING" ]; then
-                                    terraform import aws_ecs_cluster.this "$CLUSTER_ARN" || true
-                                  fi
-                                fi
-
-                                # ECS Service
-                                if ! tf_state_has aws_ecs_service.this; then
-                                  SVC_STATUS=$(aws ecs describe-services --cluster mern-backend-cluster --services mern-backend-svc --query 'services[0].status' --output text 2>/dev/null || true)
-                                  if [ -n "$SVC_STATUS" ] && [ "$SVC_STATUS" != "None" ] && [ "$SVC_STATUS" != "MISSING" ]; then
-                                    terraform import aws_ecs_service.this "mern-backend-cluster/mern-backend-svc" || true
+                                  if [ -n "${INSTANCE_ID:-}" ] && [ "${INSTANCE_ID:-None}" != "None" ]; then
+                                    INSTANCE_IP=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text 2>/dev/null || true)
+                                    if [ -n "${TG_ARN:-}" ] && [ "${TG_ARN:-None}" != "None" ] && [ -n "${INSTANCE_IP:-}" ] && [ "${INSTANCE_IP:-None}" != "None" ]; then
+                                      terraform import aws_lb_target_group_attachment.app "${TG_ARN}/${INSTANCE_IP}/8000" || true
+                                    fi
                                   fi
                                 fi
                               fi

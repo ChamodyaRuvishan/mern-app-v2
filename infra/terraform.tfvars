@@ -6,6 +6,7 @@ image_repo        = "chamodyaruvishan/mern-backend" # REPLACE THIS
 image_tag         = "latest"
 app_port          = 8000
 health_check_path = "/"
+instance_type     = "t3.micro"
 
 # Add environment variables for your app here
 env = {
