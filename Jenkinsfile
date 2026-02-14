@@ -63,9 +63,24 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'AWS_CREDS', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         sh """
                             set -e
+                            # Trim accidental spaces/newlines from Jenkins credential fields
+                            export AWS_ACCESS_KEY_ID=\$(echo "\$AWS_ACCESS_KEY_ID" | tr -d '[:space:]')
+                            export AWS_SECRET_ACCESS_KEY=\$(echo "\$AWS_SECRET_ACCESS_KEY" | tr -d '[:space:]')
+                            # Avoid stale session token poisoning static-key auth
+                            unset AWS_SESSION_TOKEN || true
+
                             echo "BRANCH_NAME=\${BRANCH_NAME:-unset}"
                             echo "GIT_BRANCH=\${GIT_BRANCH:-unset}"
                             echo "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"
+                            echo "AWS_ACCESS_KEY_ID_PREFIX=\${AWS_ACCESS_KEY_ID%%????}****"
+
+                            if command -v aws >/dev/null 2>&1; then
+                              echo "Checking AWS caller identity..."
+                              aws sts get-caller-identity --output json >/dev/null
+                            else
+                              echo "AWS CLI not found; skipping sts precheck and continuing with Terraform."
+                            fi
+
                             echo "Initializing Terraform..."
                             terraform init -input=false
 
