@@ -32,11 +32,13 @@ pipeline {
 
                         for (svc in services) {
                             def image = "${env.DOCKERHUB_USER}/mern-${svc.name}"
-                            sh """
-                                docker build -f ${svc.dockerfile} -t ${image}:${TAG_SHORT} -t ${image}:latest ${svc.context}
-                                docker push ${image}:${TAG_SHORT}
-                                docker push ${image}:latest
-                            """
+                            sh "docker build -f ${svc.dockerfile} -t ${image}:${TAG_SHORT} -t ${image}:latest ${svc.context}"
+                            retry(3) {
+                                sh "docker push ${image}:${TAG_SHORT}"
+                            }
+                            retry(3) {
+                                sh "docker push ${image}:latest"
+                            }
                         }
                     }
                     sh 'docker logout || true'
