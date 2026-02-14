@@ -9,12 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build and Push') {
             steps {
                 script {
@@ -52,8 +46,14 @@ pipeline {
 
         // --- DEPLOY STAGE (Terraform) ---
         stage('Deploy (Terraform)') {
-            // Only run this stage on the main branch
-            when { branch 'main' }
+            // Run deploy for main branch in both multibranch and single pipeline jobs
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                }
+            }
             environment {
                 AWS_DEFAULT_REGION = 'us-east-1' 
             }
@@ -62,9 +62,16 @@ pipeline {
                     // Use AWS Credentials stored in Jenkins (ID: AWS_CREDS)
                     withCredentials([usernamePassword(credentialsId: 'AWS_CREDS', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         sh """
+                            set -e
+                            echo "BRANCH_NAME=\${BRANCH_NAME:-unset}"
+                            echo "GIT_BRANCH=\${GIT_BRANCH:-unset}"
+                            echo "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}"
                             echo "Initializing Terraform..."
                             terraform init -input=false
-                            
+
+                            echo "Validating Terraform..."
+                            terraform validate
+
                             echo "Deploying to AWS..."
                             terraform apply -auto-approve \\
                               -var region=${AWS_DEFAULT_REGION} \\
