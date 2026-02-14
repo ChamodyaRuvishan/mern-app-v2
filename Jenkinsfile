@@ -183,6 +183,47 @@ pipeline {
                 }
             }
         }
+
+        stage('Verify EC2 SSH') {
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.GIT_BRANCH == 'refs/heads/main' }
+                }
+            }
+            steps {
+                dir('infra') {
+                    withCredentials([file(credentialsId: 'EC2_SSH_KEY_FILE', variable: 'EC2_KEY_FILE')]) {
+                        sh '''
+                            set -e
+                            chmod 600 "$EC2_KEY_FILE"
+                            EC2_IP=$(terraform output -raw ec2_public_ip)
+                            if [ -z "$EC2_IP" ]; then
+                              echo "No EC2 public IP from Terraform output."
+                              exit 1
+                            fi
+
+                            echo "Checking SSH connectivity to $EC2_IP..."
+                            for i in $(seq 1 18); do
+                              if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" 'echo SSH_OK' >/dev/null 2>&1; then
+                                echo "SSH connected."
+                                break
+                              fi
+                              echo "SSH not ready yet (attempt $i/18). Waiting 10s..."
+                              sleep 10
+                              if [ "$i" -eq 18 ]; then
+                                echo "SSH check failed after retries."
+                                exit 1
+                              fi
+                            done
+
+                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" 'docker ps --format "{{.Names}} {{.Status}}"'
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
