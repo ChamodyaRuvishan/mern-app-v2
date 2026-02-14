@@ -206,14 +206,18 @@ pipeline {
 
                             echo "Checking SSH connectivity to $EC2_IP..."
                             for i in $(seq 1 18); do
-                              if ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" 'echo SSH_OK' >/dev/null 2>&1; then
+                              SSH_OUTPUT=$(ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -i "$EC2_KEY_FILE" ec2-user@"$EC2_IP" 'echo SSH_OK' 2>&1 || true)
+                              if echo "$SSH_OUTPUT" | grep -q "SSH_OK"; then
                                 echo "SSH connected."
                                 break
                               fi
+                              echo "SSH attempt $i failed: $(echo "$SSH_OUTPUT" | tail -n 1)"
                               echo "SSH not ready yet (attempt $i/18). Waiting 10s..."
                               sleep 10
                               if [ "$i" -eq 18 ]; then
-                                echo "SSH check failed after retries."
+                                echo "SSH check failed after retries. Verify:"
+                                echo "1) EC2 key pair name in terraform matches the private key in Jenkins credential EC2_SSH_KEY_FILE."
+                                echo "2) Security group allows TCP/22 from Jenkins server public IP."
                                 exit 1
                               fi
                             done
