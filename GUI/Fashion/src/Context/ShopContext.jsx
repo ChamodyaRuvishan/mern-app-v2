@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 export const ShopContext =createContext(null);
 import all_product from '../Components/assets/data/all_product.js';
+import { API_BASE_URL } from '../config';
 
 const getDefaultCart = () => {
     let cart = {};
@@ -15,11 +16,11 @@ const ShopContextProvider = (props) => {
 
     const fetchInfo = async () => {
         try {
-            await fetch('http://localhost:8000/allproducts')
+            await fetch(`${API_BASE_URL}/allproducts`)
             .then((res) => res.json())
             .then((data) => { setApiProducts(data) });
         } catch (error) {
-            console.log('API fetch failed:', error);
+            console.log(`API fetch failed (${API_BASE_URL}):`, error);
         }
     }
 

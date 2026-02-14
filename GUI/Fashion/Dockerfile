@@ -1,18 +1,17 @@
-# Dockerfile for React client
-# Build react client
-FROM node:22-alpine
+# Stage 1: Build React app
+FROM node:18-alpine AS build
 
-# Working directory be app
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY package*.json ./
-
-# Installing dependencies
-RUN npm install --silent
-
-# copy local files to app folder
+RUN npm install
 COPY . .
+RUN npm run build
 
-EXPOSE 3000
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
 
-CMD ["npm","start"]
+# We changed /app/build to /app/dist here:
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

@@ -51,6 +51,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
+      - VITE_PROXY_TARGET=http://server:8000
     networks:
       - app-network
 

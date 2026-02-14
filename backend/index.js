@@ -11,9 +11,10 @@ const cors = require('cors');
 
 app.use(express.json());
 app.use(cors());
+const apiPath = (route) => [`/api${route}`, route];
 
  //Database Connection with MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.log('MongoDB connection error:', err));
 
@@ -38,7 +39,7 @@ const upload = multer({storage: storage})
 
 app.use('/images',express.static('upload/images'))
 
-app.post("/upload",upload.single('product'),(req,res)=>{
+app.post(apiPath("/upload"),upload.single('product'),(req,res)=>{
     res.json({
         success:1,
         image_url:`http://localhost:${port}/images/${req.file.filename}`
@@ -82,7 +83,7 @@ const Product = mongoose.model("Product",{
     },  
 })
 
-app.post('/addproduct', async (req,res)=>{
+app.post(apiPath('/addproduct'), async (req,res)=>{
     let products = await Product.find({});
     // Static product IDs: 1,2,3,11,12,13,21,22,23,31,32,33
     let staticIds = [1,2,3,11,12,13,21,22,23,31,32,33];
@@ -108,7 +109,7 @@ app.post('/addproduct', async (req,res)=>{
 
 // Creating API for deleting products
 
-app.post('/removeproduct', async (req,res)=>{
+app.post(apiPath('/removeproduct'), async (req,res)=>{
     await Product.findOneAndDelete({id:req.body.id});
     console.log("Product removed from MongoDB");
     res.json({
@@ -118,7 +119,7 @@ app.post('/removeproduct', async (req,res)=>{
 })
 
 // Creating API for getting all products
-app.get('/allproducts', async (req,res)=>{
+app.get(apiPath('/allproducts'), async (req,res)=>{
     let products = await Product.find({});
     console.log("All Products Fetched from MongoDB:", products.length);
     res.send(products);
@@ -146,44 +147,54 @@ const Users = mongoose.model('Users',{
 })
 
 // Creating endpoint for registering the user
-app.post('/signup', async (req,res)=>{
-    let check = await Users.findOne({email:req.body.email});
-    if (check) {
-        return res.status(400).json({success:false,errors:"existing user found with same email address"});
+app.post(apiPath('/signup'), async (req,res)=>{
+    try {
+        let check = await Users.findOne({email:req.body.email});
+        if (check) {
+            return res.status(400).json({success:false,errors:"existing user found with same email address"});
+        }
+        
+        let cart = {};
+        for (let i = 0; i < 300; i++) {
+            cart[i] = 0;
+        }
+        
+        const user = new Users({
+            name: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            cartData: cart,
+        });
+        
+        await user.save();
+        const data = {user: {id: user.id}};
+        const token = jwt.sign(data, 'secret_ecom');
+        res.json({success: true, token})
+    } catch (error) {
+        console.error("Signup error:", error);
+        res.status(500).json({ success: false, errors: "Signup failed. Check DB/API config." });
     }
-    
-    let cart = {};
-    for (let i = 0; i < 300; i++) {
-        cart[i] = 0;
-    }
-    
-    const user = new Users({
-        name: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        cartData: cart,
-    });
-    
-    await user.save();
-    const data = {user: {id: user.id}};
-    const token = jwt.sign(data, 'secret_ecom');
-    res.json({success: true, token})
 })
 
 // creating endpoint for user login
-app.post('/login', async (req,res)=>{
-    let user = await Users.findOne({email:req.body.email});
-    if(user) {
-        const passCompare = req.body.password === user.password;
-        if(passCompare) {
-            const data = {user: {id: user.id}};
-            const token = jwt.sign(data, 'secret_ecom');
-            res.json({success: true, token});
+app.post(apiPath('/login'), async (req,res)=>{
+    try {
+        let user = await Users.findOne({email:req.body.email});
+        if(user) {
+            const passCompare = req.body.password === user.password;
+            if(passCompare) {
+                const data = {user: {id: user.id}};
+                const token = jwt.sign(data, 'secret_ecom');
+                res.json({success: true, token});
+            } else {
+                res.json({success: false, errors: "Wrong Password"});
+            }
         } else {
-            res.json({success: false, errors: "Wrong Password"});
+            res.json({success: false, errors: "Wrong Email Id"});
         }
-    } else {
-        res.json({success: false, errors: "Wrong Email Id"});
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ success: false, errors: "Login failed. Check DB/API config." });
     }
 })
 

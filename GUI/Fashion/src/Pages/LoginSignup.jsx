@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
 import './CSS/LoginSignup.css'
+import { API_BASE_URL } from '../config';
 
 const LoginSignup = () => {
 
@@ -15,42 +16,54 @@ const changeHandler = (e)=>{
 }
 const login = async()=>{
   console.log("login fuction executed",formData);
-  let responseData;
-  await fetch('http://localhost:8000/login',{
-    method: 'POST',
-    headers: {
-      Accept:'application/form-data',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  }).then((response)=>response.json()).then((data)=>responseData=data)
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`,{
+      method: 'POST',
+      headers: {
+        Accept:'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-  if(responseData.success){
-    localStorage.setItem('auth-token',responseData.token);
-    window.location.replace("/");
+    const responseData = await response.json();
+    if(responseData.success){
+      localStorage.setItem('auth-token',responseData.token);
+      window.location.replace("/");
+    }
+    else{
+      alert(responseData.errors || "Login failed");
+    }
+  } catch (error) {
+    console.error("Login request failed:", error);
+    alert(`Cannot reach API at ${API_BASE_URL}. Check backend URL/server.`);
   }
-  else{
-    alert(responseData.errors);}
 }
 
 const signup = async()=>{
   console.log("sign up fuction executed",formData);
-  let responseData;
-  await fetch('http://localhost:8000/signup',{
-    method: 'POST',
-    headers: {
-      Accept:'application/form-data',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  }).then((response)=>response.json()).then((data)=>responseData=data)
+  try {
+    const response = await fetch(`${API_BASE_URL}/signup`,{
+      method: 'POST',
+      headers: {
+        Accept:'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-  if(responseData.success){
-    localStorage.setItem('auth-token',responseData.token);
-    window.location.replace("/");
+    const responseData = await response.json();
+    if(responseData.success){
+      localStorage.setItem('auth-token',responseData.token);
+      window.location.replace("/");
+    }
+    else{
+      alert(responseData.errors || "Signup failed");
+    }
+  } catch (error) {
+    console.error("Signup request failed:", error);
+    alert(`Cannot reach API at ${API_BASE_URL}. Check backend URL/server.`);
   }
-  else{
-    alert(responseData.errors);}
 }
 
   return (
